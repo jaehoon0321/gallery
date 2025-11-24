@@ -1,27 +1,32 @@
 package com.ssg.gallery.account.controller;
 
-import ch.qos.logback.core.util.StringUtil;
-import com.ssg.gallery.account.dto.AccountJoinRequests;
-import com.ssg.gallery.account.dto.AccountLoginRequests;
+import com.ssg.gallery.account.dto.AccountJoinRequest;
+import com.ssg.gallery.account.dto.AccountLoginRequest;
+
 import com.ssg.gallery.account.helper.AccountHelper;
+
+import com.ssg.gallery.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("v1")
-public class AccountController {
-    private final AccountHelper accountHelper;
+import java.util.Map;
 
-    //회원가입
+@RestController // ①
+@RequiredArgsConstructor // ②
+@RequestMapping("/v1") // ③
+public class AccountController {
+
+    private final AccountHelper accountHelper; // ④
+
     @PostMapping("/api/account/join")
-    public ResponseEntity<?> join(@RequestBody AccountJoinRequests joinReq) {
-        //입력값이 비어 있다면
-        if (joinReq.getName() == null || joinReq.getLoginId() == null || joinReq.getLoginPw() == null) {
+    public ResponseEntity<?> join(@RequestBody AccountJoinRequest joinReq) { // ⑤
+        // 입력 값이 비어 있다면
+        if (!StringUtils.hasLength(joinReq.getName()) || !StringUtils.hasLength(joinReq.getLoginId()) || !StringUtils.hasLength(joinReq.getLoginPw())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -29,34 +34,30 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
-    //로그인
     @PostMapping("/api/account/login")
-    public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response, @RequestBody AccountLoginRequests loginReq) {
-
-        if (loginReq.getLoginId() == null || loginReq.getLoginPw() == null) {
+    public ResponseEntity<?> login(HttpServletRequest req, HttpServletResponse res, @RequestBody AccountLoginRequest loginReq) { // ⑥
+        // 입력 값이 비어 있다면
+        if (!StringUtils.hasLength(loginReq.getLoginId()) || !StringUtils.hasLength(loginReq.getLoginPw())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String output = accountHelper.login(loginReq, request, response);
-        if(output == null) {
+        String output = accountHelper.login(loginReq, req, res);
+
+        if (output == null) { // 로그인 실패 시
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
         return new ResponseEntity<>(output, HttpStatus.OK);
-
     }
 
-    //로그인 여부 확인
     @GetMapping("/api/account/check")
-    public ResponseEntity<?> check(HttpServletRequest request) {
-        return new ResponseEntity<>(accountHelper.isLoggedIn(request), HttpStatus.OK);
+    public ResponseEntity<?> check(HttpServletRequest req) { // ⑦
+        return new ResponseEntity<>(accountHelper.isLoggedIn(req), HttpStatus.OK);
     }
 
-   //로그아웃
     @PostMapping("/api/account/logout")
-     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-          accountHelper.logout(request, response);
-          return new ResponseEntity<>(HttpStatus.OK);
-     }
-
+    public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) { // ⑧
+        accountHelper.logout(req, res);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
