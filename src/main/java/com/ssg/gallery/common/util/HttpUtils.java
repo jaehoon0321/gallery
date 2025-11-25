@@ -2,13 +2,15 @@ package com.ssg.gallery.common.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+
+/// 공통 기능
 public class HttpUtils {
     // 세션 입력
     public static void setSession(HttpServletRequest req, String key, Object value) { // ①
         req.getSession().setAttribute(key, value);
     }
 
-    // 세션 값 조회
+    // 세션 값 조회ㅎ
     public static Object getSessionValue(HttpServletRequest req, String key) { // ②
         return req.getSession().getAttribute(key);
     }
