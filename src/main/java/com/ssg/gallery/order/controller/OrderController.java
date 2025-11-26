@@ -51,6 +51,11 @@ public class OrderController {
         // 로그인 회원 아이디
         Integer memberId = accountHelper.getMemberId(req);
 
+
+        if (memberId == null) {
+            return new ResponseEntity<>("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED); // 401 반환
+        }
+
         // 주문 입력
         orderService.order(orderReq, memberId);
 
